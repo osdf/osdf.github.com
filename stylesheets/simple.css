@@ -1,0 +1,47 @@
+@import url(http://fonts.googleapis.com/css?family=Crimson+Text);
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 750px;
+}
+header, section { display: block; }
+html {
+  font-family: "Crimson Text", serif;
+  text-rendering: optimizeLegibility;
+  background: #222;
+  color: #fff;
+}
+body {
+  line-height: 150%;
+  margin-top: 40px;
+}
+body a { color: #73d216; }
+h1 {
+  font-size: 300%;
+  line-height: 150%;
+  font-weight: 400;
+  margin-bottom: 20px;
+  color: #fff;
+  font-family: 'Yanone Kaffeesatz', serif;
+}
+p {
+  margin-bottom: 20px;
+  color: #fff;
+}
+header {
+  display: inline;
+  float: left;
+  position: relative;
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 700px;
+}
+section#image, section#about {
+  display: inline;
+  float: left;
+  position: relative;
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 350px;
+}
