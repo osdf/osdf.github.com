@@ -18,7 +18,14 @@ body {
   margin-top: 40px;
 }
 
-body a { color: #73d216; }
+body a { 
+    color: #73d216; 
+    text-decoration: none;
+}
+
+body a:hover {
+    text-decoration: underline;
+}
 
 h1 {
   font-size: 300%;
