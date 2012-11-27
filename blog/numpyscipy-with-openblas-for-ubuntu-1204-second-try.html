@@ -37,7 +37,7 @@
 </header>
 <article>
     <p><em>Attention conservation notice: Improved (?) writings to self about some mundane configuration process I somehow can't get right completely, filled up with fluffy words.</em></p>
-<p>I recently set up an <a href="https://www.archlinux.org/">Arch Linux</a> computer and found out that my original description for numpy/scipy with OpenBLAS <a href="http://osdf.github.com/blog/numpyscipy-with-openblas-for-ubuntu-1204.html">here</a> is way too convoluted: OpenBLAS <a href="https://github.com/xianyi/OpenBLAS/issues/147">fixed</a> the missing symbols issue that resulted in the unnecessary workaround in my original post. It turns out, however, that getting everything running on <a href="http://releases.ubuntu.com/12.04/">Ubuntu 12.04</a> is still more work than on Arch Linux.</p>
+<p>I recently set up an <a href="https://www.archlinux.org/">Arch Linux</a> computer and found out that my original description for numpy/scipy with OpenBLAS <a href="numpyscipy-with-openblas-for-ubuntu-1204.html">here</a> is way too convoluted: OpenBLAS <a href="https://github.com/xianyi/OpenBLAS/issues/147">fixed</a> the missing symbols issue that resulted in the unnecessary workaround in my original post. It turns out, however, that getting everything running on <a href="http://releases.ubuntu.com/12.04/">Ubuntu 12.04</a> is still more work than on Arch Linux.</p>
 <h2 id="apt-get_preparations_for_1204"><code>apt-get</code> preparations for 12.04</h2>
 <div class="codehilite"><pre>sudo apt-get install git python-dev gfortran
 </pre></div>
@@ -61,7 +61,7 @@ sudo make <span class="nv">PREFIX</span><span class="o">=</span>/usr/local/ inst
 </pre></div>
 
 
-<p>Instead of a using a <code>site.cfg</code>, export the two shell variables:</p>
+<p>Instead of a using a <code>site.cfg</code>, export these shell variables:</p>
 <div class="codehilite"><pre><span class="nb">export </span><span class="nv">BLAS</span><span class="o">=</span>/usr/local/lib/libopenblas.a
 <span class="nb">export </span><span class="nv">LAPACK</span><span class="o">=</span>/usr/local/lib/libopenblas.a
 <span class="nb">export </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/usr/local/lib/
@@ -107,7 +107,7 @@ sudo python setup.py install
 </pre></div>
 
 
-<p>Make sure that in your <code>sudo</code> command the variables <code>BLAS</code>, <code>LAPACK</code> and <code>LD_LIBRARY_PATH</code> are correctly set! This <a href="https://gist.github.com/3842524#file_test_scipy.py">test</a> script (it has some room for improvement, though ...) works on my machine after the system wide install:</p>
+<p>Make sure that in your <code>sudo</code> command the variables <code>BLAS</code>, <code>LAPACK</code> and <code>LD_LIBRARY_PATH</code> are correctly set, as shown above! This <a href="https://gist.github.com/3842524#file_test_scipy.py">test</a> script (it has some room for improvement, though ...) works on my machine after the system wide install:</p>
 <div class="codehilite"><pre>cholesky: 0.080588388443 sec
 svd: 1.13443040848 sec
 </pre></div>
