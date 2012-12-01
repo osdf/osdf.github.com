@@ -48,7 +48,7 @@ descent with a learning rate of 1e-3. Gradient computation for the RBMs is done 
 Afterwards, the deep network is finetuned for 500 epochs with a learning rate of 2.5e-3,
 again with minibatch gradient descent. The input is not preprocessed.</p>
 <p>Important note: I didn't use any validation set to tune the learning rate(s) and the
-other hyperparameters: I chose the the learning rate for the fine tuning part such 
+other hyperparameters: I chose the learning rate for the fine tuning part such 
 that a smooth progress on the training set is achieved. Stoping after 500 epochs
 is completely arbitrary &#8212; actually, I didn't want to wait longer.
 If time permits I will do a more thorough set of experiments using a validation set 
