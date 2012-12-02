@@ -80,30 +80,6 @@
 
     
 
-    <p><a href="http://yaroslavvb.blogspot.de/">Yaroslav Bulatov</a> made a dataset of glyphs available that he called <a href="http://yaroslavvb.blogspot.de/2011/09/notmnist-dataset.html">notMNIST</a>.
-I briefly ran my implementation for deep networks on the dataset and got about
-3.8% error rate on the test set. For the <em>inverted</em> data (binary pixel inversion)
-I get a similar error, about 4% (inverted <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> is more difficult than the original version,
-at least when one does not take precaution, e.g. see a nice recent <a href="http://www.cs.toronto.edu/~tang/papers/RbmZM.pdf">report</a>
-that talks about MNIST and binary-binary RBMs.)</p>
-<p>The network is a 784-1024-1024-1024-1024-10 neural network. All layers except
-the last one are pretrained as a binary-binary RBM: 50 epochs of minibatch gradient
-descent with a learning rate of 1e-3. Gradient computation for the RBMs is done via CD-1.
-Afterwards, the deep network is finetuned for 500 epochs with a learning rate of 2.5e-3,
-again with minibatch gradient descent. The input is not preprocessed.</p>
-<p>Important note: I didn't use any validation set to tune the learning rate(s) and the
-other hyperparameters: I chose the learning rate for the fine tuning part such 
-that a smooth progress on the training set is achieved. Stoping after 500 epochs
-is completely arbitrary &#8212; actually, I didn't want to wait longer.
-If time permits I will do a more thorough set of experiments using a validation set 
-to determine hyperparameters.</p>
-    
-    
-
-    <div class="divider"></div>
-
-    
-
     <ul>
 <li>
 <p><a href="http://stevelosh.com/blog/2012/10/the-homely-mutt/">Set up Mutt</a>: Comprehensive description for email client <a href="http://www.mutt.org/">mutt</a>. Good comments on <a href="http://news.ycombinator.com/item?id=4597156">HN thread</a>, among others mentioning <a href="http://www.claws-mail.org/">Claws</a>.</p>
