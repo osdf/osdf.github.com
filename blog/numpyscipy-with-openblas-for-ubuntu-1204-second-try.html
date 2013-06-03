@@ -37,7 +37,7 @@
 </header>
 <article>
     <p><em>Attention conservation notice: Improved (?) writings to self about some mundane configuration process I somehow can't get right completely, filled up with fluffy words.</em></p>
-<p>I recently set up an <a href="https://www.archlinux.org/">Arch Linux</a> computer and found out that my original description for numpy/scipy with OpenBLAS <a href="numpyscipy-with-openblas-for-ubuntu-1204.html">here</a> is way too convoluted: OpenBLAS <a href="https://github.com/xianyi/OpenBLAS/issues/147">fixed</a> the missing symbols issue that resulted in the unnecessary workaround in my original post. It turns out, however, that getting everything running on <a href="http://releases.ubuntu.com/12.04/">Ubuntu 12.04</a> is still more work than on Arch Linux.</p>
+<p>I recently set up an <a href="https://www.archlinux.org/">Arch Linux</a> computer and found out that my original description for numpy/scipy with OpenBLAS <a href="numpyscipy-with-openblas-for-ubuntu-1204.html">here</a> is way too convoluted: OpenBLAS <a href="https://github.com/xianyi/OpenBLAS/issues/147">fixed</a> the missing symbols issue that resulted in the unnecessary workaround in my original post. It turns out, however, that getting everything running on <a href="http://releases.ubuntu.com/12.04/">Ubuntu 12.04</a> is still more work than on Arch Linux. <em>Update June 3rd, 2013: deleted some non-sense paragraphs.</em></p>
 <h2 id="apt-get_preparations_for_1204"><code>apt-get</code> preparations for 12.04</h2>
 <div class="codehilite"><pre>sudo apt-get install git python-dev gfortran
 </pre></div>
@@ -61,7 +61,21 @@ sudo make <span class="nv">PREFIX</span><span class="o">=</span>/usr/local/ inst
 </pre></div>
 
 
-<p>Instead of a using a <code>site.cfg</code>, export these shell variables:</p>
+<p>Usually one is interested in OpenBLAS because of its fast matrix-matrix multiplication. Whether numpy has a fast <code>dot</code> function is indicated by the presence of <code>core/_dotblas.so</code>. However, currently (June 2013) this file is only build, if <code>site.cfg</code> has an <code>[atlas]</code> <a href="https://github.com/numpy/numpy/issues/1265">section</a> (also see <a href="http://stackoverflow.com/questions/11443302/compiling-numpy-with-openblas-integration">here</a> and <a href="http://myvirtualbrain.blogspot.de/2013/01/compiling-and-installing-numpy-with.html">here</a>). There is an interesting thread <a href="http://numpy-discussion.10968.n7.nabble.com/Unable-to-building-numpy-with-openblas-using-bento-or-distutils-td33304.html">here</a> with a link to this <a href="https://github.com/akesandgren/numpy/commit/363339dd3a9826f3e3e7dc4248c258d3c4dfcd7c">fix</a> in order to add support for using OpenBLAS for the <code>_dotblas</code> function. However, right now do <code>vi site.cfg</code> and:</p>
+<div class="codehilite"><pre><span class="o">[</span>default<span class="o">]</span>
+<span class="nv">library_dirs</span> <span class="o">=</span> /usr/local/lib
+
+<span class="o">[</span>atlas<span class="o">]</span>
+<span class="nv">atlas_libs</span> <span class="o">=</span> openblas
+<span class="nv">library_dirs</span> <span class="o">=</span> /usr/local/lib
+
+<span class="o">[</span>lapack<span class="o">]</span>
+<span class="nv">lapack_libs</span> <span class="o">=</span> openblas
+<span class="nv">library_dirs</span> <span class="o">=</span> /usr/local/lib
+</pre></div>
+
+
+<p>Without the <code>[lapack]</code> section there were problems with installing <code>scipy</code> later on. Additionally:</p>
 <div class="codehilite"><pre><span class="nb">export </span><span class="nv">BLAS</span><span class="o">=</span>/usr/local/lib/libopenblas.a
 <span class="nb">export </span><span class="nv">LAPACK</span><span class="o">=</span>/usr/local/lib/libopenblas.a
 <span class="nb">export </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/usr/local/lib/
@@ -73,7 +87,7 @@ sudo make <span class="nv">PREFIX</span><span class="o">=</span>/usr/local/ inst
 </pre></div>
 
 
-<p>If you look into <code>build/numpy/core</code>, the file <code>_dotblas.so</code> is missing: <code>numpy.dot</code> won't use the fast dot product from OpenBLAS even though <code>libopenblas</code> was detected in <code>/usr/local/lib</code>. (I suspect some issue with <code>LD_LIBRARY_PATH</code> or <code>LIBRARY_PATH</code> not pointing to some necessary library, maybe some Fortran related ones in <code>/usr/4.6</code>.) I don't know why this is the case, however if I use <a href="http://cournape.wordpress.com/2012/10/10/notes-on-building-numpyscipy-with-openblas/">bento</a> for building numpy (I simply use the two lines in the code box on the linked site with the single file distribution; it fails halfway, but that's not a problem because), <code>_dotblas.so</code> gets build. Copy it from <code>build</code> to <code>build/numpy/core</code>, then</p>
+<p>If you look into <code>build/numpy/core</code>, the file <code>_dotblas.so</code> should be available.</p>
 <div class="codehilite"><pre>sudo python setup.py install
 </pre></div>
 
