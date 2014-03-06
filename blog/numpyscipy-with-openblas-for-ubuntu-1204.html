@@ -3,17 +3,17 @@
     <head>
         <title>osdf's log : Numpy/Scipy with OpenBLAS for Ubuntu 12.04</title>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="./theme/css/main.css" type="text/css" />
+        <link rel="stylesheet" href="http://osdf.github.com/theme/css/main.css" type="text/css" />
 
         <!--[if IE]>
                 <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
         <!--[if lte IE 7]>
-                <link rel="stylesheet" type="text/css" media="all" href="./css/ie.css"/>
-                <script src="./js/IE8.js" type="text/javascript"></script><![endif]-->
+                <link rel="stylesheet" type="text/css" media="all" href="http://osdf.github.com/css/ie.css"/>
+                <script src="http://osdf.github.com/js/IE8.js" type="text/javascript"></script><![endif]-->
 
         <!--[if lt IE 7]>
-                <link rel="stylesheet" type="text/css" media="all" href="./css/ie6.css"/><![endif]-->
+                <link rel="stylesheet" type="text/css" media="all" href="http://osdf.github.com/css/ie6.css"/><![endif]-->
         <script type="text/javascript">
 
           var _gaq = _gaq || [];
@@ -30,29 +30,28 @@
 </head>
 
 <body>
-                
+        
 <header>
     <h1>Numpy/Scipy with OpenBLAS for Ubuntu 12.04</h1>
-    <time datetime="2012-09-27T00:00:00">Thu 27 September 2012</time>
-</header>
+<time datetime="2012-09-27T00:00:00">Thu 27 September 2012</time></header>
 <article>
-    <p><em>Attention conservation notice: Superseded by an <a href="numpyscipy-with-openblas-for-ubuntu-1204-second-try.html">improved</a> text.</em></p>
+    <p><em>Attention conservation notice: Superseded by an <a href="/../numpyscipy-with-openblas-for-ubuntu-1204-second-try.html">improved</a> text.</em></p>
 <p><a href="http://math-atlas.sourceforge.net/">ATLAS</a> was my linear algebra backend on Linux machines for years. Installing it usually took a complete day and always failed at the first attempt. Probably because my notes were not as tidy as <a href="http://idolinux.blogspot.de/2011/02/atlas-numpy-scipy-build-on-rhel-6.html">these</a>.</p>
 <p><a href="https://github.com/xianyi/OpenBLAS">OpenBLAS</a> is supposed to be much <a href="http://stackoverflow.com/questions/7596612/benchmarking-python-vs-c-using-blas-and-numpy">faster</a> than ATLAS and much easier to setup with <a href="http://numpy.scipy.org/">numpy</a>/<a href="http://scipy.org/">scipy</a>, too. At least that's what you can <a href="http://www.der-schnorz.de/2012/06/optimized-linear-algebra-and-numpyscipy/">read</a> <a href="http://permalink.gmane.org/gmane.comp.python.numeric.general/43170">around</a> the web. Trying both methods didn't work for me though. Luckily enough, Google does Japanese and with some tiny adaptation <a href="http://www.kde.cs.tut.ac.jp/~atsushi/?p=493">this</a> works. I'll describe the complete procedure for Ubuntu 12.04.</p>
-<h2 id="apt-get_and_other_preparations_for_1204"><code>apt-get</code> and other preparations for 12.04</h2>
-<div class="codehilite"><pre>sudo apt-get install git python-dev gfortran swig
+<h2><code>apt-get</code> and other preparations for 12.04</h2>
+<div class="highlight"><pre>sudo apt-get install git python-dev gfortran swig
 sudo apt-get install rcconf dialog
 </pre></div>
 
 
 <p>The first line is clear, you probably have these installed anyway. I use <code>rcconf</code> to <a href="http://ubuntuguide.org/wiki/Ubuntu:Precise">disable CPU frequency scaling</a> (search for <code>ONDEMAND</code> on the linked site). 12.04 uses a new <a href="http://en.wikipedia.org/wiki/Gold_(linker)">linker</a> with some <a href="http://stackoverflow.com/questions/3476093/replacing-ld-with-gold-any-experience">known</a> <a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42756">issues</a>. Therefore</p>
-<div class="codehilite"><pre><span class="nb">export </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span>/usr/local/lib
+<div class="highlight"><pre><span class="nb">export </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span>/usr/local/lib
 </pre></div>
 
 
 <p>Note that adapting <code>LD_LIBRARY_PATH</code> or updating something in <code>/etc/ld.so.conf.d</code> (even done in the <a href="http://unix.stackexchange.com/questions/27369/ldconfig-issue-with-non-standard-lib-directory-in-centos">correct</a> way) does not help.</p>
-<h2 id="openblas">OpenBLAS</h2>
-<div class="codehilite"><pre>git clone git://github.com/xianyi/OpenBLAS
+<h2>OpenBLAS</h2>
+<div class="highlight"><pre>git clone git://github.com/xianyi/OpenBLAS
 wget http://www.netlib.org/blas/blast-forum/cblas.tgz
 </pre></div>
 
@@ -60,13 +59,13 @@ wget http://www.netlib.org/blas/blast-forum/cblas.tgz
 <p>Also <code>wget</code> the latest LAPACK from <code>http://www.netlib.org/lapack/</code>. Un<code>tar</code> both <code>tgz</code>s into their appropriately named directories.</p>
 <p>Change into the cloned <code>OpenBLAS</code> directory and make two tiny modifications to <code>Makefile.rule</code>: Uncomment the lines <code>NO_CBLAS = 1</code> and <code>NO_LAPACK = 1</code>.
 Then</p>
-<div class="codehilite"><pre>make <span class="nv">FC</span><span class="o">=</span>gfortran
+<div class="highlight"><pre>make <span class="nv">FC</span><span class="o">=</span>gfortran
 sudo make <span class="nv">PREFIX</span><span class="o">=</span>/usr/local/ install
 </pre></div>
 
 
 <p>For building <code>CBLAS</code>, change into the extracted directory. In <code>Makefile.in</code> do</p>
-<div class="codehilite"><pre><span class="nv">BLLIB</span> <span class="o">=</span> /usr/local/lib/libopenblas.a 
+<div class="highlight"><pre><span class="nv">BLLIB</span> <span class="o">=</span> /usr/local/lib/libopenblas.a 
 <span class="nv">CBLIB</span> <span class="o">=</span> ../lib/libcblas.a
 ...
 <span class="nv">LOADER</span> <span class="o">=</span> <span class="k">$(</span>FC<span class="k">)</span> -lpthread
@@ -78,7 +77,7 @@ sudo make <span class="nv">PREFIX</span><span class="o">=</span>/usr/local/ inst
 
 <p>Adapt the last two lines to your needs, <code>-fPIC</code> is the important piece.
 Then</p>
-<div class="codehilite"><pre>make
+<div class="highlight"><pre>make
 <span class="nb">cd </span>lib
 ar -x libcblas.a
 gfortran -lopenblas -shared -o libcblas.so *.o
@@ -88,7 +87,7 @@ sudo cp libcblas.* /usr/local/lib/
 
 <p>If you get an error about a missing library <code>openblas</code> with the <code>gfortran</code> command then you should first check if your <code>LIBRARY_PATH</code> is set correctly (i.e. pointing to the place where you installed OpenBLAS).</p>
 <p>Continuing with LAPACK, change the file <code>make.inc</code> (copied from <code>make.inc.example</code>) in the extracted directory as follows:</p>
-<div class="codehilite"><pre><span class="nv">OPTS</span>     <span class="o">=</span> -O3 -march<span class="o">=</span>native -m64 -fomit-frame-pointer -fPIC
+<div class="highlight"><pre><span class="nv">OPTS</span>     <span class="o">=</span> -O3 -march<span class="o">=</span>native -m64 -fomit-frame-pointer -fPIC
 ...
 <span class="nv">NOOPT</span>    <span class="o">=</span> -O0 -fPIC
 ...
@@ -99,7 +98,7 @@ sudo cp libcblas.* /usr/local/lib/
 
 
 <p>Again, <code>-fPIC</code> is the important piece. Then (subsitute the correct version for <code>3.?.?</code>)</p>
-<div class="codehilite"><pre>make lapacklib
+<div class="highlight"><pre>make lapacklib
 mkdir tmp
 <span class="nb">cd </span>tmp
 cp ../liblapack.3.?.?.a .
@@ -110,20 +109,20 @@ sudo cp liblapack.3.?.?.* /usr/local/lib
 
 
 <p>Finally, add the following symbolic links in <code>/usr/local/lib</code>:</p>
-<div class="codehilite"><pre><span class="nb">cd</span> /usr/local/lib
+<div class="highlight"><pre><span class="nb">cd</span> /usr/local/lib
 sudo ln -sn liblapack.3.?.?.a liblapack.a
 sudo ln -sn liblapack.3.?.?.so liblapack.so
 </pre></div>
 
 
 <p>Ready for the python part!</p>
-<h2 id="numpy">Numpy</h2>
-<div class="codehilite"><pre>git clone https://github.com/numpy/numpy
+<h2>Numpy</h2>
+<div class="highlight"><pre>git clone https://github.com/numpy/numpy
 </pre></div>
 
 
 <p>In the <code>numpy</code> folder, create a <code>site.cfg</code> with the following two sections:</p>
-<div class="codehilite"><pre><span class="o">[</span>default<span class="o">]</span>
+<div class="highlight"><pre><span class="o">[</span>default<span class="o">]</span>
 <span class="nv">library_dirs</span> <span class="o">=</span> /usr/local/lib
 <span class="nv">include_dirs</span> <span class="o">=</span> /usr/local/include
 
@@ -133,14 +132,14 @@ sudo ln -sn liblapack.3.?.?.so liblapack.so
 
 
 <p>Check the detected configuration with <code>python setup.py config</code>. You should see several <code>ATLAS_INFO</code> paired with <code>None</code>. If there is something like <code>3.8.2</code> instead of <code>None</code> then you have an ATLAS install somewhere on your system and numpy won't use OpenBLAS. Get rid of this install (e.g. via <code>apt-get purge</code>) and rerun the <code>config</code> command. If <code>ATLAS_INFO</code> is completely missing then numpy couldn't find your <code>libopenblas*</code> libraries &#8212; you need to check all previous steps again. Now:</p>
-<div class="codehilite"><pre>python setup.py build
+<div class="highlight"><pre>python setup.py build
 sudo python setup.py install
 </pre></div>
 
 
 <p>Test your installation with <a href="https://gist.github.com/3842524#file_test_numpy.py">this</a> (Before doing a system-wide installation I prefer to do a local installation via <code>python setup.py install --prefix=~/local/to/me</code>. In this case
 you need to adopt <code>PYTHONPATH</code> accordingly). On the following computer </p>
-<div class="codehilite"><pre>cat /proc/cpuinfo
+<div class="highlight"><pre>cat /proc/cpuinfo
 ...
 model name     : Intel<span class="o">(</span>R<span class="o">)</span> Core<span class="o">(</span>TM<span class="o">)</span> i7 CPU 870  @ 2.93GHz
 ...
@@ -148,7 +147,7 @@ model name     : Intel<span class="o">(</span>R<span class="o">)</span> Core<spa
 
 
 <p>I get</p>
-<div class="codehilite"><pre>FAST BLAS
+<div class="highlight"><pre>FAST BLAS
 version: 1.8.0.dev-3f10c36
 maxint: 9223372036854775807
 
@@ -157,21 +156,22 @@ dot: 0.162246799469
 
 
 <p>For reference, an ATLAS-based numpy installation (via <code>apt-get</code>) takes about 0.26 sec, numpy without any optimized BLAS takes about 0.98 sec (on the mentioned computer). You can change the number of cores OpenBLAS utilizes via <code>OPENBLAS_NUM_THREADS</code>, e.g. <code>export OPENBLAS_NUM_THREADS=2</code> results in </p>
-<div class="codehilite"><pre>FAST BLAS
-version: 1.8.0.dev-3f10c36
-maxint: 9223372036854775807
+<div class="highlight"><pre> <span class="o">:::</span><span class="n">bash</span>
+<span class="n">FAST</span> <span class="n">BLAS</span>
+<span class="nl">version:</span> <span class="mf">1.8.0</span><span class="p">.</span><span class="n">dev</span><span class="o">-</span><span class="mf">3f</span><span class="mi">10</span><span class="n">c36</span>
+<span class="nl">maxint:</span> <span class="mi">9223372036854775807</span>
 
-dot: 0.0949754238129 sec
+<span class="nl">dot:</span> <span class="mf">0.0949754238129</span> <span class="n">sec</span>
 </pre></div>
 
 
-<h2 id="scipy">Scipy</h2>
-<div class="codehilite"><pre>git clone https://github.com/scipy/scipy
+<h2>Scipy</h2>
+<div class="highlight"><pre>git clone https://github.com/scipy/scipy
 </pre></div>
 
 
 <p>I mentioned conspicuously often <em>some ATLAS installation on your system</em>, but why have one anyway, this is about OpenBLAS, after all?! The funny (or rather not so) fact is that for scipy the following is necessary:</p>
-<div class="codehilite"><pre>sudo apt-get install libatlas-base-dev
+<div class="highlight"><pre>sudo apt-get install libatlas-base-dev
 <span class="nb">cd</span> /usr/local/lib
 sudo ln -sn /usr/lib/atlas-base/liblapack_atlas.a liblapack_atlas.a
 sudo ln -sn /usr/lib/atlas-base/liblapack_atlas.so liblapack_atlas.so
@@ -179,7 +179,7 @@ sudo ln -sn /usr/lib/atlas-base/liblapack_atlas.so liblapack_atlas.so
 
 
 <p>But only <strong>after</strong> you have a working numpy installation! Otherwise it interferes with OpenBLAS. This is a work around for a problem that I don't quite understand and that seems to bother <a href="http://stackoverflow.com/questions/8823692/undefined-symbol-clapack-sgesv">only</a> <a href="http://projects.scipy.org/scipy/ticket/1031">some</a> <a href="http://blog.tremily.us/posts/SciPy_and_ATLAS/">people</a>, well, and me. (To the reader: If you know of a <em>solution</em>, please tell me). Your <code>site.cfg</code> looks like that:</p>
-<div class="codehilite"><pre><span class="o">[</span>default<span class="o">]</span>
+<div class="highlight"><pre><span class="o">[</span>default<span class="o">]</span>
 <span class="nv">library_dirs</span> <span class="o">=</span> /usr/local/lib
 <span class="nv">include_dirs</span> <span class="o">=</span> /usr/local/include
 
@@ -189,19 +189,19 @@ sudo ln -sn /usr/lib/atlas-base/liblapack_atlas.so liblapack_atlas.so
 
 
 <p>(There are no sections for <code>umfpack</code>. Adapt accordingly to your needs). Now</p>
-<div class="codehilite"><pre>python setup.py build
+<div class="highlight"><pre>python setup.py build
 sudo python setup.py install
 </pre></div>
 
 
 <p>results in a working scipy installation (i.e. <code>python -c "import scipy.linalg"</code> works without any segfaults.). Timings for the scipy installation can be done via <a href="https://gist.github.com/3842524#file_test_scipy.py">this</a> script (it has some room for improvement, though ...). My machine produces</p>
-<div class="codehilite"><pre>cholesky: 0.080588388443 sec
+<div class="highlight"><pre>cholesky: 0.080588388443 sec
 svd: 1.13443040848 sec
 </pre></div>
 
 
 <p>Finally, if you feel good enough (and do a <code>pip install nose</code>), you can run <a href="https://nose.readthedocs.org">nose</a> tests via</p>
-<div class="codehilite"><pre>python -c <span class="s2">&quot;import numpy; numpy.test(verbose=2)&quot;</span>
+<div class="highlight"><pre>python -c <span class="s2">&quot;import numpy; numpy.test(verbose=2)&quot;</span>
 python -c <span class="s2">&quot;import scipy; scipy.test(verbose=2)&quot;</span>
 </pre></div>
 
@@ -209,10 +209,9 @@ python -c <span class="s2">&quot;import scipy; scipy.test(verbose=2)&quot;</span
 <p>(Note: I didn't!). Comments, corrections, pointers, etc. are more than welcome.</p>
 </article>
 
-
         <footer>
         <p>
-        <em><a href="http://osdf.github.com">osdf</a> is on <a href="http://github.com/osdf">github</a>, <a href="https://twitter.com/plastiq">twitter</a> and <a href="http://de.linkedin.com/pub/christian-osendorfer/22/915/a36">linkedin</a>. This page is part of his <a href="./index.html">blog</a>.<em>
+        <em><a href="http://osdf.github.com">osdf</a> is on <a href="http://github.com/osdf">github</a>, <a href="https://twitter.com/plastiq">twitter</a> and <a href="http://de.linkedin.com/pub/christian-osendorfer/22/915/a36">linkedin</a>. This page is part of his <a href="http://osdf.github.com/index.html">blog</a>.<em>
         </footer>
 
 </body>

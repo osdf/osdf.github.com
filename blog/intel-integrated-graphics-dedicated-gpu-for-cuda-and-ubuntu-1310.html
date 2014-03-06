@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>osdf's log : Intel Integrated Graphics, dedicated GPU for CUDA and Ubuntu 13.10</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="http://osdf.github.com/theme/css/main.css" type="text/css" />
+
+        <!--[if IE]>
+                <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+        <!--[if lte IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="http://osdf.github.com/css/ie.css"/>
+                <script src="http://osdf.github.com/js/IE8.js" type="text/javascript"></script><![endif]-->
+
+        <!--[if lt IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="http://osdf.github.com/css/ie6.css"/><![endif]-->
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-35562047-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
+</head>
+
+<body>
+        
+<header>
+    <h1>Intel Integrated Graphics, dedicated GPU for CUDA and Ubuntu 13.10</h1>
+<time datetime="2014-03-04T00:00:00">Tue 04 March 2014</time></header>
+<article>
+    <p><em>Attention conservation notice: Summary to self about a hacky configuration process, probably fixed really soon anyway somewhere upstream.</em></p>
+<p>The goal is to get <a href="http://www.ubuntu.com/">Ubuntu 13.10</a> (Desktop version) running on the integrated Intel HD 3000 graphics chip and use the available GTX 660i as a dedicated CUDA device. Googling around brings up various guides, e.g. from <a href="http://www.r-tutor.com/gpu-computing/cuda-installation/cuda5.5-ubuntu">RTutorial</a> for Ubuntu 12.10 and one on <a href="http://askubuntu.com/questions/380609/anyone-has-successfully-installed-cuda-5-5-on-ubuntu-13-10-64-bit">AskUbuntu</a> specifically for Ubuntu 13.10. These guides advocate downloading the newest driver and cuda toolkit from nvidias website and running the installation process manually. Doing so however broke my Xorg setup: After logging in wiht lightdm, the screen stays black. Investigating this issue (i.e. looking into /var/log/Xorg.0.log), it seems that with the <em>current</em> nvidia provided drivers (that is version 331.??) intel's libGLX.so gets overwritten and thus unity can not start. Looking around, <a href="http://mauricio-matera.blogspot.com.ar/2013/10/configuring-cuda-in-ubuntu-1304.html">Juan Mauricio Matera</a> already provided a simple fix for that. It seems that other people also stumbled over this problem, e.g. see this question on <a href="http://askubuntu.com/questions/355731/use-integrated-intel-graphic-card-for-display-and-tesla-for-cuda?rq=1">AskUbuntu</a>. In the following a brief write up of the complete process, mixing these [two][aksu01] <a href="http://mauricio-matera.blogspot.com.ar/2013/10/configuring-cuda-in-ubuntu-1304.html">guides</a>. Note: Using the preferred way of installing the cuda-toolkit via <code>apt-get</code> did not work for me either.</p>
+<h2>Bios</h2>
+<p>Make sure that in the BIOS the integrated graphics unit (IGP) is set as the primary device.</p>
+<h2>lspci check</h2>
+<p>After the standard installation of Ubuntu 13.10, check with lspci that both devices are available. Your output should look like this.</p>
+<div class="highlight"><pre>lspci | grep VGA
+00:02.0 VGA compatible controller: Intel Corporation ... Integrated Grahpics Controller ...
+01:00.0 VGA compatible controller: NVIDIA Corporation ...
+</pre></div>
+
+
+<h2>Preparing installation of NVIDIA drivers</h2>
+<p>The next steps are copied from the main [guide][ask01]. Blacklist any driver that is in conflict with NVIDIAS binary driver (e.g. <code>nouveau</code>): Create <code>/etc/modprobe.d/blacklist-file-drivers.conf</code> with
+    :::bash
+    blacklist nouveau
+    blacklist lbm-nouveau
+    blacklist amd76x_edac
+    blacklist vga16fb
+    blacklist rivatv
+    blacklist rivafb
+    blacklist nvidiafb
+    blacklist nvidia-173
+    blacklist nvidia-96
+    blacklist nvidia-current
+    blacklist nvidia-173-updates
+    blacklist nvidia-96-updates
+    alias nvidia nvidia_current_updates
+    alias nouveau off
+    alias lbm-nouveau off</p>
+<p>Get all dependencies for the toolkit fulfilled:</p>
+<div class="highlight"><pre>sudo apt-get install freeglut3 freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev gcc g++ gcc-4.6 g++-4.6 linux-headers-generic linux-source
+sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3 /usr/lib/libglut.so
+</pre></div>
+
+
+<p>We need to install gcc-4.6 because the CUDA toolkit currently does not work with higher versions of gcc (gcc-4.8 is provided in Ubuntu 13.10). To provide for these alternatives we need to</p>
+<div class="highlight"><pre>sudo update-alternatives --remove-all gcc
+sudo update-alternatives --config gcc
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 10
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+</pre></div>
+
+
+<p>Finally, download the lastest NVIDIA driver from <a href="http://www.nvidia.com/Download/index.aspx">here</a> and the newest toolkit (as a <code>.run</code> file) from <a href="https://developer.nvidia.com/cuda-downloads">here</a>. Reboot to make the blacklist do its work.</p>
+<h2>Installation of NVIDIA drivers</h2>
+<p>After the reboot change into a textconsole via <code>CTRL+ALT+F1</code> and stop the display manager (<code>lightdm</code> for a vanilla Ubuntu 13.10).</p>
+<div class="highlight"><pre>sudo service lightdm stop
+</pre></div>
+
+
+<p>Go to the directory where you downloaded the NVIDIA driver (probably <code>Downloads</code>). Then choose your latest gcc and run the driver installation. Note that the last two commands depend on your specific version of the download.</p>
+<div class="highlight"><pre>sudo update-alternatives --config gcc          <span class="c">#choose 4.8</span>
+sudo chmod +x NVIDIA???.run
+sudo ./NVIDIA???.run
+</pre></div>
+
+
+<p>Follow the text instructions, ignore warnings. After the installation, your NVIDIA GPU is ready:</p>
+<div class="highlight"><pre>sudo nvidia-smi
+</pre></div>
+
+
+<p>However, if you <code>start</code> <code>lightdm</code> again in order to log in graphically, you will get a black screen instead of unity. To fix the problems with the overwritten OpenGL libraries, we reinstall these again (note: libglamour is still missing, make backup earlier of /usr/share/xorg/modules).</p>
+<div class="highlight"><pre>sudo apt-get install -reinstall xserver-xorg-core  xserver-xorg-video-intel xserver-xorg-libgl1-mesa-glx
+</pre></div>
+
+
+<p>Reboot the system in order to set up the CUDA-toolkit. This can happen with the graphical UI running, so no need to stop the display manager.</p>
+<h2>Installation CUDA Toolkit</h2>
+<p>Go to your download place and after changing gcc to version 4.6 (note that this might be not necessary for later versions) we can install the cuda toolkit (version 5.5 in my case). Again, the specific name of the downloaded file depends on the version you get from NVIDIA.</p>
+<div class="highlight"><pre>sudo update-alternatives --config gcc          <span class="c">#choose 4.6</span>
+sudo chmod +x cuda_5.5???.run
+sudo ./cuda_???.run
+</pre></div>
+
+
+<p>Do not install the NVIDIA driver that comes with the toolkit! However, install the provided samples. When this done, change back to your standard version of gcc, e.g:</p>
+<div class="highlight"><pre>sudo update-alternatives --config gcc          <span class="c">#choose 4.8</span>
+</pre></div>
+
+
+<p>Set PATH (for <code>nvcc</code>) and LD_LIBRARY_PATH (for the libraries) accordingly. If you choose the standard settings during the toolkit installation, this is <code>/usr/</code> with CUDA 5.5:</p>
+<div class="highlight"><pre><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>
+<span class="nb">export </span>LD_LIBRARY_PATH
+</pre></div>
+
+
+<p>Changing into the samples directory, run <code>make</code>. After some time this should be finished building all sample programs, go several levels below the <code>bin/</code> directory and test <code>deviceQry</code>.</p>
+</article>
+
+        <footer>
+        <p>
+        <em><a href="http://osdf.github.com">osdf</a> is on <a href="http://github.com/osdf">github</a>, <a href="https://twitter.com/plastiq">twitter</a> and <a href="http://de.linkedin.com/pub/christian-osendorfer/22/915/a36">linkedin</a>. This page is part of his <a href="http://osdf.github.com/index.html">blog</a>.<em>
+        </footer>
+
+</body>
+</html>
