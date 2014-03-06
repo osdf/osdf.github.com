@@ -36,11 +36,12 @@
 <time datetime="2014-03-04T00:00:00">Tue 04 March 2014</time></header>
 <article>
     <p><em>Attention conservation notice: Summary to self about a hacky configuration process, probably fixed really soon anyway somewhere upstream.</em></p>
-<p>The goal is to get <a href="http://www.ubuntu.com/">Ubuntu 13.10</a> (Desktop version) running on the integrated Intel HD 3000 graphics chip and use the available GTX 660i as a dedicated CUDA device. Googling around brings up various guides, e.g. from <a href="http://www.r-tutor.com/gpu-computing/cuda-installation/cuda5.5-ubuntu">RTutorial</a> for Ubuntu 12.10 and one on <a href="http://askubuntu.com/questions/380609/anyone-has-successfully-installed-cuda-5-5-on-ubuntu-13-10-64-bit">AskUbuntu</a> specifically for Ubuntu 13.10. These guides advocate downloading the newest driver and cuda toolkit from nvidias website and running the installation process manually. Doing so however broke my Xorg setup: After logging in wiht lightdm, the screen stays black. Investigating this issue (i.e. looking into /var/log/Xorg.0.log), it seems that with the <em>current</em> nvidia provided drivers (that is version 331.??) intel's libGLX.so gets overwritten and thus unity can not start. Looking around, <a href="http://mauricio-matera.blogspot.com.ar/2013/10/configuring-cuda-in-ubuntu-1304.html">Juan Mauricio Matera</a> already provided a simple fix for that. It seems that other people also stumbled over this problem, e.g. see this question on <a href="http://askubuntu.com/questions/355731/use-integrated-intel-graphic-card-for-display-and-tesla-for-cuda?rq=1">AskUbuntu</a>. In the following a brief write up of the complete process, mixing these [two][aksu01] <a href="http://mauricio-matera.blogspot.com.ar/2013/10/configuring-cuda-in-ubuntu-1304.html">guides</a>. Note: Using the preferred way of installing the cuda-toolkit via <code>apt-get</code> did not work for me either.</p>
+<p>The goal is to get <a href="http://www.ubuntu.com/">Ubuntu 13.10</a> (Desktop version) running on the integrated Intel HD 3000 graphics chip and use the available GTX 660i as a dedicated CUDA device. Googling around brings up various guides, e.g. from <a href="http://www.r-tutor.com/gpu-computing/cuda-installation/cuda5.5-ubuntu">RTutorial</a> for Ubuntu 12.10 and one on <a href="http://askubuntu.com/questions/380609/anyone-has-successfully-installed-cuda-5-5-on-ubuntu-13-10-64-bit">AskUbuntu</a> specifically for Ubuntu 13.10. These guides advocate downloading the newest driver and CUDA toolkit from NVIDIAs website and running the installation process manually. Doing so however broke my Xorg setup: After logging in with lightdm, the screen stays black, somethings wrong with <a href="https://unity.ubuntu.com/">Unity</a>. Investigating this issue (i.e. looking into <code>/var/log/Xorg.0.log</code>), it seems that with the <em>current</em> NVIDIA provided drivers (that is version 331.??) intel's libGLX.so gets overwritten and thus Unity can not start. Looking around, <a href="http://mauricio-matera.blogspot.com.ar/2013/10/configuring-cuda-in-ubuntu-1304.html">Juan Mauricio Matera</a> already provided a simple fix for that. It seems that other people also stumbled over this problem, e.g. see this question on <a href="http://askubuntu.com/questions/355731/use-integrated-intel-graphic-card-for-display-and-tesla-for-cuda?rq=1">AskUbuntu</a>. In the following a brief write up of the complete process, mixing these <a href="http://askubuntu.com/questions/380609/anyone-has-successfully-installed-cuda-5-5-on-ubuntu-13-10-64-bit">two</a> <a href="http://mauricio-matera.blogspot.com.ar/2013/10/configuring-cuda-in-ubuntu-1304.html">guides</a>. </p>
+<p>Note: The preferred way of installing the CUDA-toolkit via <code>apt-get</code> did not work for me.</p>
 <h2>Bios</h2>
-<p>Make sure that in the BIOS the integrated graphics unit (IGP) is set as the primary device.</p>
+<p>Make sure that in the BIOS the integrated graphics unit (iGP) is set as the primary device.</p>
 <h2>lspci check</h2>
-<p>After the standard installation of Ubuntu 13.10, check with lspci that both devices are available. Your output should look like this.</p>
+<p>After the standard installation of Ubuntu 13.10, check with lspci that both devices are available. Your output should look similar to this.</p>
 <div class="highlight"><pre>lspci | grep VGA
 00:02.0 VGA compatible controller: Intel Corporation ... Integrated Grahpics Controller ...
 01:00.0 VGA compatible controller: NVIDIA Corporation ...
@@ -48,23 +49,25 @@
 
 
 <h2>Preparing installation of NVIDIA drivers</h2>
-<p>The next steps are copied from the main [guide][ask01]. Blacklist any driver that is in conflict with NVIDIAS binary driver (e.g. <code>nouveau</code>): Create <code>/etc/modprobe.d/blacklist-file-drivers.conf</code> with
-    :::bash
-    blacklist nouveau
-    blacklist lbm-nouveau
-    blacklist amd76x_edac
-    blacklist vga16fb
-    blacklist rivatv
-    blacklist rivafb
-    blacklist nvidiafb
-    blacklist nvidia-173
-    blacklist nvidia-96
-    blacklist nvidia-current
-    blacklist nvidia-173-updates
-    blacklist nvidia-96-updates
-    alias nvidia nvidia_current_updates
-    alias nouveau off
-    alias lbm-nouveau off</p>
+<p>The next steps are copied from the main [guide][ask01]. Blacklist any driver that is in conflict with NVIDIAS binary driver (e.g. <code>nouveau</code>): Create <code>/etc/modprobe.d/blacklist-file-drivers.conf</code> with</p>
+<div class="highlight"><pre>blacklist nouveau
+blacklist lbm-nouveau
+blacklist amd76x_edac
+blacklist vga16fb
+blacklist rivatv
+blacklist rivafb
+blacklist nvidiafb
+blacklist nvidia-173
+blacklist nvidia-96
+blacklist nvidia-current
+blacklist nvidia-173-updates
+blacklist nvidia-96-updates
+<span class="nb">alias </span>nvidia nvidia_current_updates
+<span class="nb">alias </span>nouveau off
+<span class="nb">alias </span>lbm-nouveau off
+</pre></div>
+
+
 <p>Get all dependencies for the toolkit fulfilled:</p>
 <div class="highlight"><pre>sudo apt-get install freeglut3 freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev gcc g++ gcc-4.6 g++-4.6 linux-headers-generic linux-source
 sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3 /usr/lib/libglut.so
