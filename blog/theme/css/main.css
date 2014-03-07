@@ -45,10 +45,12 @@ body header {
 body header, 
 body p .index,
 h1 {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: normal;
   color: #08c;
   margin: 0;
+  text-align: left;
+  table: display;
 }
 
 body h2 {
