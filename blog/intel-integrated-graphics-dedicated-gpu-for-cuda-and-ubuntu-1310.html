@@ -102,11 +102,11 @@ sudo ./NVIDIA???.run
 
 
 <p>However, if you <code>start</code> <code>lightdm</code> again in order to log in graphically, you will get (after the greeting login screen) a black screen instead of Unity. To fix the problems with the overwritten OpenGL libraries, we reinstall these again (To see the problem first hand, change e.g. into <code>/usr/lib/xorg/modules/extensions</code> and compare to your previous backup).  </p>
-<div class="highlight"><pre>sudo apt-get install --reinstall xserver-xorg-core  xserver-xorg-video-intel xserver-xorg-libgl1-mesa-glx
+<div class="highlight"><pre>sudo apt-get install --reinstall xserver-xorg-core  xserver-xorg-video-intel xserver-xorg-glamoregl libgl1-mesa-glx
 </pre></div>
 
 
-<p>After this step compare <code>/usr/lib/xorg/modules</code> again to your previous backup. (Note: <code>libglamouregl.so</code> was still missing for me, I simply copied it over from my backup). Reboot the system in order to set up the CUDA-toolkit. This can happen with the graphical UI running, so no need to stop the display manager.</p>
+<p>After this step compare <code>/usr/lib/xorg/modules</code> again to your previous backup. <strike>(Note: <code>libglamouregl.so</code> was still missing for me, I simply copied it over from my backup)</strike>. Reboot the system in order to set up the CUDA-toolkit. This can happen with the graphical UI running, so no need to stop the display manager.</p>
 <h2>Installation CUDA Toolkit</h2>
 <p>Go to your download place and after changing gcc to version 4.6 (note that this might be not necessary for later versions) we can install the cuda toolkit (version 5.5 in my case). Again, the specific name of the downloaded file depends on the version you get from NVIDIA.</p>
 <div class="highlight"><pre>sudo update-alternatives --config gcc          <span class="c">#choose 4.6</span>
